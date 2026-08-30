@@ -86,6 +86,12 @@ enum QARunner {
         case "open":
             try? await Task.sleep(nanoseconds: 3_000_000_000)
             scene.controller.zoomToFit(doc.trackPoints.map { .init(latitude: $0.lat, longitude: $0.lon) }, animated: false)
+            if args["edit"] != nil, let last = doc.trackPoints.last {
+                // Modification d'un GPX étranger : doit créer une copie « (Tracé) », jamais réécrire l'original.
+                doc.appendAnchor(lat: last.lat + 0.004, lon: last.lon + 0.004)
+                try? await Task.sleep(nanoseconds: 5_000_000_000)
+                note("édition : ancres \(doc.project.anchors.count), fichier \(doc.nsDocument?.fileURL?.lastPathComponent ?? "aucun")")
+            }
         case "gestures":
             gestureLog = await gestures(doc: doc, scene: scene, note: note)
             note("après gestes : ancres \(doc.project.anchors.count)")

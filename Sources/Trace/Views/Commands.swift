@@ -7,7 +7,7 @@ struct TraceCommands: Commands {
     var body: some Commands {
         CommandGroup(after: .saveItem) {
             Button("Exporter en GPX…") { scene?.showExport = true }
-                .keyboardShortcut("e", modifiers: .command)
+                .keyboardShortcut("e", modifiers: [.command, .shift])
                 .disabled(scene == nil)
         }
         CommandMenu("Tracé") {
@@ -19,7 +19,7 @@ struct TraceCommands: Commands {
                 .keyboardShortcut("i", modifiers: .command)
             Divider()
             Button("Supprimer le dernier point") { scene?.doc.removeLastAnchor() }
-                .keyboardShortcut(.delete, modifiers: .option)
+                .keyboardShortcut(.delete, modifiers: [.command, .option])
             Button("Recalculer tout avec le mode courant") { scene?.doc.recomputeAllLegs(with: scene?.doc.project.defaultProfile) }
                 .keyboardShortcut("r", modifiers: [.command, .shift])
             Button("Tout effacer…") { scene?.confirmClear() }
@@ -91,15 +91,3 @@ extension SceneContext {
     }
 }
 
-extension TraceDocument {
-    /// Aller-retour : on repasse par tous les points en sens inverse.
-    func outAndBack() {
-        guard project.anchors.count >= 2 else { return }
-        var p = project
-        let back = p.anchors.dropLast().reversed().map { Anchor(lat: $0.lat, lon: $0.lon) }
-        let backLegs = p.legs.reversed().map { Leg(profile: $0.profile, points: $0.points.reversed(), fallback: $0.fallback) }
-        p.anchors.append(contentsOf: back)
-        p.legs.append(contentsOf: backLegs)
-        commitPublic(p, actionName: "Aller-retour")
-    }
-}

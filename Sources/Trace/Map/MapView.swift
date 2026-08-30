@@ -61,10 +61,12 @@ final class TraceMapView: MKMapView {
         return contextMenuProvider?(p)
     }
 
+    var mouseExited: (() -> Void)?
+
     override func updateTrackingAreas() {
         super.updateTrackingAreas()
         if let t = tracking { removeTrackingArea(t) }
-        let t = NSTrackingArea(rect: bounds, options: [.mouseMoved, .activeInKeyWindow, .inVisibleRect], owner: self, userInfo: nil)
+        let t = NSTrackingArea(rect: bounds, options: [.mouseMoved, .mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect], owner: self, userInfo: nil)
         addTrackingArea(t)
         tracking = t
     }
@@ -72,6 +74,11 @@ final class TraceMapView: MKMapView {
     override func mouseMoved(with event: NSEvent) {
         super.mouseMoved(with: event)
         mouseMoved?(convert(event.locationInWindow, from: nil))
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        super.mouseExited(with: event)
+        mouseExited?()
     }
 }
 
@@ -102,6 +109,7 @@ struct MapView: NSViewRepresentable {
 
         map.contextMenuProvider = { [weak coord = context.coordinator] p in coord?.contextMenu(at: p) }
         map.mouseMoved = { [weak coord = context.coordinator] p in coord?.mouseMoved(at: p) }
+        map.mouseExited = { [weak coord = context.coordinator] in coord?.mouseExited() }
         map.movedToWindow = { [weak coord = context.coordinator] w in
             // La fenêtre donne l'UndoManager et le NSDocument (enregistrement automatique).
             if let w { coord?.doc.window = w }
@@ -158,6 +166,7 @@ struct MapView: NSViewRepresentable {
         private var pendingClick: DispatchWorkItem?
         private var lastMouseLegHit: Int?
         private var hoverFromMap = false
+        private var overlaysRetina: Bool?
 
         init(doc: TraceDocument, settings: MapSettings, controller: MapController) {
             self.doc = doc
@@ -185,8 +194,13 @@ struct MapView: NSViewRepresentable {
                     map.insertOverlay(o, at: 0, level: .aboveLabels)
                 }
             }
-            // Surcouches
+            // Surcouches (reconstruites si le réglage Retina change)
             let wanted = settings.overlays
+            if overlaysRetina != settings.retina {
+                for (_, o) in overlayTiles { map.removeOverlay(o) }
+                overlayTiles = [:]
+                overlaysRetina = settings.retina
+            }
             for (id, o) in overlayTiles where !wanted.contains(where: { $0.id == id }) {
                 map.removeOverlay(o)
                 overlayTiles[id] = nil
@@ -419,6 +433,7 @@ struct MapView: NSViewRepresentable {
             case .starting:
                 if let a = view.annotation as? AnchorAnnotation { draggingID = a.anchorID }
                 if let w = view.annotation as? WaypointAnnotation { draggingID = w.waypointID }
+                view.dragState = .dragging
             case .ending, .canceling:
                 defer { draggingID = nil; view.dragState = .none }
                 if let a = view.annotation as? AnchorAnnotation {
@@ -431,8 +446,13 @@ struct MapView: NSViewRepresentable {
         }
 
         func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-            if let a = view.annotation as? AnchorAnnotation { doc.selectedAnchorID = a.anchorID }
-            if let w = view.annotation as? WaypointAnnotation { doc.selectedWaypointID = w.waypointID }
+            if let a = view.annotation as? AnchorAnnotation { doc.selectedAnchorID = a.anchorID; doc.selectedWaypointID = nil }
+            if let w = view.annotation as? WaypointAnnotation { doc.selectedWaypointID = w.waypointID; doc.selectedAnchorID = nil }
+        }
+
+        func mapView(_ mapView: MKMapView, didDeselect view: MKAnnotationView) {
+            if let a = view.annotation as? AnchorAnnotation, doc.selectedAnchorID == a.anchorID { doc.selectedAnchorID = nil }
+            if let w = view.annotation as? WaypointAnnotation, doc.selectedWaypointID == w.waypointID { doc.selectedWaypointID = nil }
         }
 
         func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
@@ -512,6 +532,12 @@ struct MapView: NSViewRepresentable {
             return best.map { ($0.0, $0.1) }
         }
 
+        func mouseExited() {
+            controller.mouseCoordinate = nil
+            if lastMouseLegHit != nil { NSCursor.arrow.set(); lastMouseLegHit = nil }
+            if hoverFromMap { doc.hoverIndex = nil; hoverFromMap = false }
+        }
+
         func mouseMoved(at p: NSPoint) {
             guard let map else { return }
             let c = map.convert(p, toCoordinateFrom: map)
@@ -558,7 +584,7 @@ struct MapView: NSViewRepresentable {
                     return menu
                 }
                 if let w = hit.annotation as? WaypointAnnotation {
-                    menu.addItem(item("Modifier le point d'intérêt…") { [weak self] in self?.doc.selectedWaypointID = w.waypointID })
+                    menu.addItem(item("Modifier le point d'intérêt…") { [weak self] in self?.doc.selectedWaypointID = w.waypointID; self?.doc.selectedAnchorID = nil })
                     menu.addItem(item("Supprimer le point d'intérêt") { [weak self] in self?.doc.removeWaypoint(id: w.waypointID) })
                     return menu
                 }

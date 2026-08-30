@@ -1,5 +1,6 @@
 import Foundation
 import MapKit
+import CoreLocation
 import Combine
 
 /// Réglages de la carte, persistés.
@@ -31,6 +32,13 @@ final class MapController: ObservableObject {
     @Published var centerCoordinate = CLLocationCoordinate2D(latitude: 46.6, longitude: 2.3)
     /// Coordonnée sous la souris (affichée dans la barre d'état).
     @Published var mouseCoordinate: CLLocationCoordinate2D?
+    /// Message d'erreur de localisation à afficher (autorisation refusée, service coupé…).
+    @Published var locationError: String?
+    @Published var isLocating = false
+
+    private var locationManager: CLLocationManager?
+    private var locationDelegate: LocationDelegate?
+    private var wantsLocation = false
 
     func zoomToFit(_ coords: [CLLocationCoordinate2D], animated: Bool = true) {
         guard let map = mapView, !coords.isEmpty else { return }
@@ -61,17 +69,63 @@ final class MapController: ObservableObject {
         map.setRegion(r, animated: true)
     }
 
+    /// « Ma position » : demande l'autorisation CoreLocation (MapKit seul ne la demande jamais sur macOS),
+    /// puis centre la carte sur la première position reçue.
     func showUserLocation() {
-        guard let map = mapView else { return }
-        map.showsUserLocation = true
-        if let loc = map.userLocation.location {
-            center(on: loc.coordinate, zoom: 14)
+        let lm = locationManager ?? CLLocationManager()
+        locationManager = lm
+        let d = locationDelegate ?? LocationDelegate(controller: self)
+        locationDelegate = d
+        lm.delegate = d
+        lm.desiredAccuracy = kCLLocationAccuracyHundredMeters
+        wantsLocation = true
+        isLocating = true
+        switch lm.authorizationStatus {
+        case .notDetermined:
+            lm.requestWhenInUseAuthorization()
+        case .denied, .restricted:
+            isLocating = false
+            locationError = "La localisation est refusée pour Tracé. Autorisez-la dans Réglages Système > Confidentialité et sécurité > Service de localisation, ou vérifiez que le service est activé."
+        default:
+            mapView?.showsUserLocation = true
+            lm.requestLocation()
+        }
+    }
+
+    fileprivate func locationAuthorized() {
+        guard wantsLocation, let lm = locationManager else { return }
+        mapView?.showsUserLocation = true
+        lm.requestLocation()
+    }
+
+    fileprivate func locationDenied() {
+        guard wantsLocation else { return }
+        wantsLocation = false
+        isLocating = false
+        locationError = "La localisation est refusée pour Tracé. Autorisez-la dans Réglages Système > Confidentialité et sécurité > Service de localisation."
+    }
+
+    fileprivate func locationReceived(_ loc: CLLocation) {
+        guard wantsLocation else { return }
+        wantsLocation = false
+        isLocating = false
+        center(on: loc.coordinate, zoom: 14)
+    }
+
+    fileprivate func locationFailed(_ error: Error) {
+        guard wantsLocation else { return }
+        wantsLocation = false
+        isLocating = false
+        if let e = error as? CLError, e.code == .denied {
+            locationDenied()
+            wantsLocation = false
         } else {
-            map.setUserTrackingMode(.follow, animated: true)
+            locationError = "Position introuvable pour l'instant (\(error.localizedDescription)). Sur un Mac sans Wi-Fi ni GPS, le service de localisation peut ne rien renvoyer."
         }
     }
 
     static func span(forZoom zoom: Double, latitude: Double, viewWidth: CGFloat) -> MKCoordinateSpan {
+
         let lonDelta = 360 / pow(2, zoom) * Double(viewWidth) / 256
         return MKCoordinateSpan(latitudeDelta: lonDelta * cos(latitude * .pi / 180), longitudeDelta: lonDelta)
     }
@@ -80,5 +134,30 @@ final class MapController: ObservableObject {
         let lonDelta = map.region.span.longitudeDelta
         guard lonDelta > 0 else { return 0 }
         return log2(360 * Double(map.bounds.width) / (256 * lonDelta))
+    }
+}
+
+/// Délégué CoreLocation (les rappels arrivent sur le thread principal).
+private final class LocationDelegate: NSObject, CLLocationManagerDelegate {
+    weak var controller: MapController?
+    init(controller: MapController) { self.controller = controller }
+
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        Task { @MainActor in
+            switch manager.authorizationStatus {
+            case .authorizedAlways, .authorized: self.controller?.locationAuthorized()
+            case .denied, .restricted: self.controller?.locationDenied()
+            default: break
+            }
+        }
+    }
+
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let loc = locations.last else { return }
+        Task { @MainActor in self.controller?.locationReceived(loc) }
+    }
+
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        Task { @MainActor in self.controller?.locationFailed(error) }
     }
 }

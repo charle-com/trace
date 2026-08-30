@@ -36,9 +36,23 @@ public enum Stats {
 
     /// Lissage par moyenne glissante sur une fenêtre en mètres (0 = pas de lissage).
     public static func smoothedElevations(_ pts: [TrackPoint], window: Double = 100) -> [Double]? {
-        let eles = pts.map { $0.ele }
-        guard !eles.isEmpty, eles.allSatisfy({ $0 != nil }) else { return nil }
-        let e = eles.map { $0! }
+        guard !pts.isEmpty else { return nil }
+        // Les trous (un service d'altitude en panne sur un tronçon) sont interpolés ; il faut au moins la moitié des points.
+        let known = pts.indices.filter { pts[$0].ele != nil }
+        guard known.count * 2 >= pts.count else { return nil }
+        var e = [Double](repeating: 0, count: pts.count)
+        var prev: Int? = nil, k = 0
+        for i in pts.indices {
+            if let v = pts[i].ele { e[i] = v; prev = i; continue }
+            while k < known.count && known[k] < i { k += 1 }
+            let next = k < known.count ? known[k] : nil
+            switch (prev, next) {
+            case let (p?, n?): e[i] = pts[p].ele! + (pts[n].ele! - pts[p].ele!) * Double(i - p) / Double(n - p)
+            case let (p?, nil): e[i] = pts[p].ele!
+            case let (nil, n?): e[i] = pts[n].ele!
+            default: e[i] = 0
+            }
+        }
         guard window > 0, pts.count > 2 else { return e }
         let cum = Geo.cumulativeDistances(pts)
         var out = [Double](repeating: 0, count: e.count)

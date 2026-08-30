@@ -37,9 +37,18 @@ struct ContentView: View {
             Text(doc.lastError ?? "")
         }
         .onDeleteCommand {
+            // ⌫ agit sur la sélection de la carte seulement (le dernier point se supprime par ⌘⌥⌫ ou la barre d'outils).
             if let id = doc.selectedWaypointID { doc.removeWaypoint(id: id) }
             else if let id = doc.selectedAnchorID { doc.removeAnchor(id: id) }
-            else { doc.removeLastAnchor() }
+        }
+        .alert("Ma position", isPresented: Binding(get: { ctx.controller.locationError != nil }, set: { if !$0 { ctx.controller.locationError = nil } })) {
+            Button("Ouvrir les Réglages") {
+                NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices")!)
+                ctx.controller.locationError = nil
+            }
+            Button("OK", role: .cancel) { ctx.controller.locationError = nil }
+        } message: {
+            Text(ctx.controller.locationError ?? "")
         }
         .navigationSubtitle(subtitle)
     }
@@ -120,7 +129,7 @@ struct MapControls: View {
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
         .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(.quaternary))
         VStack(spacing: 0) {
-            control("location", "Ma position") { ctx.controller.showUserLocation() }
+            control(ctx.controller.isLocating ? "location.fill" : "location", "Ma position") { ctx.controller.showUserLocation() }
             Divider().frame(width: 20)
             control("arrow.up.left.and.arrow.down.right", "Ajuster au tracé") {
                 ctx.controller.zoomToFit(doc.trackPoints.map { .init(latitude: $0.lat, longitude: $0.lon) })
@@ -281,6 +290,26 @@ enum ExportHelper {
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let url = dir.appendingPathComponent("\(name.isEmpty ? "Tracé" : name).gpx")
         do { try data.write(to: url); return url } catch { return nil }
+    }
+}
+
+// MARK: - Champ texte qui valide à la sortie (pas un undo par caractère)
+
+struct CommitTextField: View {
+    let title: String
+    let value: String
+    var axis: Axis = .horizontal
+    let commit: (String) -> Void
+    @State private var draft = ""
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        TextField(title, text: $draft, axis: axis)
+            .focused($focused)
+            .onAppear { draft = value }
+            .onChange(of: value) { _, v in if !focused { draft = v } }
+            .onSubmit { commit(draft) }
+            .onChange(of: focused) { _, f in if !f, draft != value { commit(draft) } }
     }
 }
 

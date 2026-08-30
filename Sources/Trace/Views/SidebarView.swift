@@ -51,7 +51,7 @@ struct SidebarView: View {
                 ForEach(doc.project.waypoints) { w in
                     HStack {
                         Image(systemName: "mappin.circle.fill").foregroundStyle(.indigo)
-                        TextField("Nom", text: Binding(get: { w.name }, set: { var c = w; c.name = $0; doc.updateWaypoint(c) }))
+                        CommitTextField(title: "Nom", value: w.name) { var c = w; c.name = $0; doc.updateWaypoint(c) }
                             .textFieldStyle(.plain)
                         Spacer()
                         Button {

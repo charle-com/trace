@@ -1,5 +1,6 @@
 import Foundation
 import MapKit
+import os
 
 /// Description d'un fond de carte ou d'une surcouche raster.
 struct MapLayer: Identifiable, Hashable {
@@ -58,7 +59,7 @@ struct MapLayer: Identifiable, Hashable {
 /// on assemble les 4 tuiles du niveau de zoom suivant dans une tuile 512 px (technique gpx.studio / Leaflet detectRetina).
 final class LayerTileOverlay: MKTileOverlay {
     let layer: MapLayer
-    private let retina: Bool
+    let retina: Bool
     static let diskCache: URLCache = {
         let dir = Network.cacheDirectory.appendingPathComponent("tiles")
         return URLCache(memoryCapacity: 128 << 20, diskCapacity: 2 << 30, directory: dir)
@@ -67,14 +68,18 @@ final class LayerTileOverlay: MKTileOverlay {
         let cfg = URLSessionConfiguration.default
         cfg.httpAdditionalHeaders = ["User-Agent": Network.userAgent, "Referer": "https://charlesneveu.fr/trace"]
         cfg.urlCache = diskCache
-        cfg.requestCachePolicy = .returnCacheDataElseLoad
+        cfg.requestCachePolicy = .useProtocolCachePolicy   // respecte Expires / max-age (OSM : 7 jours et plus)
         cfg.httpMaximumConnectionsPerHost = 6
         cfg.timeoutIntervalForRequest = 20
         return URLSession(configuration: cfg)
     }()
-    /// Compteurs pour la QA.
-    nonisolated(unsafe) static var loaded = 0
-    nonisolated(unsafe) static var failed = 0
+    /// Compteurs pour la QA (modifiés depuis plusieurs queues).
+    private static let counters = OSAllocatedUnfairLock(initialState: (loaded: 0, failed: 0))
+    static var loaded: Int { counters.withLock { $0.loaded } }
+    static var failed: Int { counters.withLock { $0.failed } }
+    private static func count(success: Bool) {
+        counters.withLock { if success { $0.loaded += 1 } else { $0.failed += 1 } }
+    }
 
     init(layer: MapLayer, retina: Bool) {
         self.layer = layer
@@ -96,12 +101,12 @@ final class LayerTileOverlay: MKTileOverlay {
         let stitch = retina && layer.retinaTemplate == nil
         if !stitch {
             fetch(url(forTilePath: path)) { data in
-                if data != nil { Self.loaded += 1 } else { Self.failed += 1 }
+                Self.count(success: data != nil)
                 result(data, data == nil ? URLError(.cannotLoadFromNetwork) : nil)
             }
             return
         }
-        // Assemblage 2x2 des tuiles z+1.
+        // Assemblage 2x2 des tuiles z+1 dans un bitmap exact de 512 px (pas de lockFocus : sûr hors thread principal).
         let z = path.z + 1
         let group = DispatchGroup()
         var parts = [Data?](repeating: nil, count: 4)
@@ -112,40 +117,55 @@ final class LayerTileOverlay: MKTileOverlay {
             fetch(u) { data in parts[i] = data; group.leave() }
         }
         group.notify(queue: .global(qos: .userInitiated)) {
-            let images = parts.map { $0.flatMap { NSImage(data: $0) } }
+            let images = parts.map { $0.flatMap { NSImage(data: $0)?.cgImage(forProposedRect: nil, context: nil, hints: nil) } }
             if images.allSatisfy({ $0 == nil }) {
-                Self.failed += 1
+                Self.count(success: false)
                 result(nil, URLError(.cannotLoadFromNetwork))
                 return
             }
-            let out = NSImage(size: NSSize(width: 512, height: 512))
-            out.lockFocus()
-            for i in 0..<4 {
-                guard let img = images[i] else { continue }
-                let dx = CGFloat(i % 2) * 256, dy = CGFloat(1 - i / 2) * 256
-                img.draw(in: NSRect(x: dx, y: dy, width: 256, height: 256), from: .zero, operation: .sourceOver, fraction: 1)
-            }
-            out.unlockFocus()
-            guard let tiff = out.tiffRepresentation, let rep = NSBitmapImageRep(data: tiff),
-                  let png = rep.representation(using: .png, properties: [:]) else {
-                Self.failed += 1
+            guard let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 512, pixelsHigh: 512, bitsPerSample: 8,
+                                             samplesPerPixel: 4, hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB,
+                                             bytesPerRow: 0, bitsPerPixel: 0),
+                  let ctx = NSGraphicsContext(bitmapImageRep: rep) else {
+                Self.count(success: false)
                 result(nil, URLError(.cannotDecodeContentData))
                 return
             }
-            Self.loaded += 1
+            let cg = ctx.cgContext
+            cg.interpolationQuality = .none
+            for i in 0..<4 {
+                guard let img = images[i] else { continue }
+                let dx = CGFloat(i % 2) * 256, dy = CGFloat(1 - i / 2) * 256
+                cg.draw(img, in: CGRect(x: dx, y: dy, width: 256, height: 256))
+            }
+            guard let png = rep.representation(using: .png, properties: [:]) else {
+                Self.count(success: false)
+                result(nil, URLError(.cannotDecodeContentData))
+                return
+            }
+            Self.count(success: true)
             result(png, nil)
         }
     }
 
+    /// Une tuile n'est acceptée que si c'est une image (portail captif, page « accès bloqué » OSM en 200 : rejetées
+    /// et purgées du cache). Hors ligne, la dernière version en cache est resservie, périmée ou non.
     private func fetch(_ url: URL, completion: @escaping (Data?) -> Void) {
         var req = URLRequest(url: url)
-        req.cachePolicy = .returnCacheDataElseLoad
-        Self.session.dataTask(with: req) { data, resp, _ in
-            guard let data, let http = resp as? HTTPURLResponse, http.statusCode == 200, data.count > 0 else {
-                completion(nil)
+        req.cachePolicy = .useProtocolCachePolicy
+        Self.session.dataTask(with: req) { data, resp, err in
+            if let data, let http = resp as? HTTPURLResponse, http.statusCode == 200, data.count > 0,
+               http.mimeType?.hasPrefix("image/") == true, http.value(forHTTPHeaderField: "x-blocked") == nil {
+                completion(data)
                 return
             }
-            completion(data)
+            if let http = resp as? HTTPURLResponse, http.statusCode == 200 { Self.diskCache.removeCachedResponse(for: req) }
+            if err != nil, let cached = Self.diskCache.cachedResponse(for: req), cached.data.count > 0,
+               (cached.response as? HTTPURLResponse)?.mimeType?.hasPrefix("image/") == true {
+                completion(cached.data)
+                return
+            }
+            completion(nil)
         }.resume()
     }
 }

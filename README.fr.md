@@ -21,7 +21,7 @@ Au premier lancement, macOS peut demander de confirmer l'ouverture (app non nota
 
 - **Tracer par points d'ancrage** : clic gauche = nouveau point, l'itinéraire entre deux points est calculé automatiquement (BRouter) selon le mode : Randonnée, Vélo route, Gravel, VTT, Au plus court, Voiture, Ligne droite.
 - **Clic droit sur la carte** : « Tracer jusqu'ici (mode courant) », « au plus court », « en ligne droite », « en… » (autre mode), insertion d'un point sur le tracé, point d'intérêt, boucle, suppression du dernier point, centrage, copie des coordonnées.
-- **Édition** : glisser une ancre recalcule les deux tronçons voisins ; clic sur la ligne insère une ancre ; ⌥-clic force la ligne droite ; ⌫ supprime le point sélectionné (sinon le dernier) ; ⌘Z / ⇧⌘Z annuler-rétablir nommés.
+- **Édition** : glisser une ancre recalcule les deux tronçons voisins ; clic sur la ligne insère une ancre ; ⌥-clic force la ligne droite ; ⌫ supprime le point sélectionné (⌘⌥⌫ le dernier) ; ⌘Z / ⇧⌘Z annuler-rétablir nommés.
 - **Fin de tracé** : Revenir au départ (⌘L), Aller-retour (⇧⌘L), Inverser (⌘I), Recalculer tout avec le mode courant (⇧⌘R), Tout effacer (⇧⌘⌫).
 - **Fonds de carte** (barre latérale, ⌘1 à ⌘9) : Plan IGN v2, Photos aériennes IGN, OpenStreetMap, OpenTopoMap, CyclOSM, OSM France, Satellite Esri, Plans / Satellite / Hybride Apple. Avec une clé Géoplateforme saisie dans les Réglages : Carte topo IGN (SCAN 25) et TOP 25 touristique. Avec une clé Thunderforest : Outdoors, OpenCycleMap, Landscape (Retina natif).
 - **Enregistrement automatique** : dès le premier point, un fichier est créé dans `~/Documents/Tracés/` (dossier modifiable) et réécrit à chaque modification ; un document déjà nommé est réenregistré en silence. Désactivable dans les Réglages.
@@ -29,8 +29,8 @@ Au premier lancement, macOS peut demander de confirmer l'ouverture (app non nota
 - **Tuiles nettes sur Retina** : assemblage 2x2 des tuiles du niveau supérieur (désactivable), cache disque de 2 Go.
 - **Altitudes** : IGN RGE ALTI (précision métrique) avec repli Valhalla puis Open-Meteo, profil altimétrique synchronisé avec la carte (survol = point jaune sur le tracé), D+ / D- lissés (fenêtre 100 m, hystérésis 5 m), durée estimée (règle des randonneurs, vitesses réglables).
 - **Fichiers** : le document est un GPX standard (`.gpx`). Le projet (ancres, modes) est embarqué dans `<metadata><extensions>` : rouvrable et éditable dans Tracé, lisible par n'importe quelle app. Autosave, versions, iCloud Drive.
-- **Import** : ouvrir n'importe quel GPX (Garmin, Strava, Komoot…) ; « Rendre éditable » convertit la trace en ancres ; altitudes complétées si absentes.
-- **Export** (⌘E) : GPX propre pour l'Apple Watch (trace ou route, altitudes, points d'intérêt, simplification Douglas-Peucker au choix) ; bouton Partager = AirDrop vers l'iPhone.
+- **Import** : ouvrir n'importe quel GPX (Garmin, Strava, Komoot…) ; « Rendre éditable » convertit la trace en ancres ; altitudes complétées si absentes. Le fichier d'origine n'est jamais réécrit : les modifications vont dans une copie `<nom> (Tracé).gpx` du dossier des tracés.
+- **Export** (⇧⌘E) : GPX propre pour l'Apple Watch (trace ou route, altitudes, points d'intérêt, simplification Douglas-Peucker au choix) ; bouton Partager = AirDrop vers l'iPhone.
 - **Recherche** : champ de recherche (lieu, adresse, ou « lat, lon »), Ma position (⌘⌥L), Ajuster au tracé (⌘⏎), marqueurs kilométriques (⌘K).
 
 ## Construire

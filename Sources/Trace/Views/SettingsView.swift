@@ -4,7 +4,6 @@ struct SettingsView: View {
     @AppStorage("ignKey") private var ignKey = ""
     @AppStorage("thunderforestKey") private var tfKey = ""
     @AppStorage("preferMarkedTrails") private var preferMarkedTrails = false
-    @AppStorage("retinaTiles") private var retina = true
     @AppStorage("autosave") private var autosave = true
     @AppStorage("autosaveFolder") private var autosaveFolder = ""
 
@@ -42,9 +41,6 @@ struct SettingsView: View {
                 TextField("Clé API", text: $tfKey)
                 Text("Débloque OpenCycleMap, Outdoors et Landscape en Retina. Clé gratuite (150 000 tuiles par mois) sur thunderforest.com.")
                     .font(.caption).foregroundStyle(.secondary)
-            }
-            Section("Affichage") {
-                Toggle("Tuiles nettes sur écran Retina (assemblage 2x, plus de trafic)", isOn: $retina)
             }
             Section("Cache") {
                 Button("Vider le cache des tuiles") {

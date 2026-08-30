@@ -158,11 +158,12 @@ public struct RouteProject: Codable, Equatable, Sendable {
     public func toGPX(embedProject: Bool) -> GPXFile {
         var f = GPXFile(name: name, desc: notes.isEmpty ? nil : notes, creator: "Tracé")
         f.waypoints = waypoints
-        let pts = trackPoints
-        if pts.count >= 2 {
-            f.tracks = [GPXTrack(name: name, segments: [pts])]
-        } else if !importedTracks.isEmpty {
+        if anchors.count <= 1 && !importedTracks.isEmpty {
+            // Trace importée non éditée : on garde ses segments d'origine.
             f.tracks = [GPXTrack(name: name, segments: importedTracks)]
+        } else {
+            let pts = trackPoints
+            if pts.count >= 2 { f.tracks = [GPXTrack(name: name, segments: [pts])] }
         }
         if embedProject { f.projectJSON = try? jsonString() }
         return f

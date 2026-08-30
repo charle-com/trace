@@ -21,7 +21,7 @@ The app is not notarized: on first launch, right-click the app and choose Open.
 
 - **Draw by anchor points**: left-click adds a point, the route between two points is computed automatically (BRouter) according to the active mode: Hiking, Road bike, Gravel, MTB, Shortest, Car, Straight line.
 - **Right-click on the map**: "Route to here (current mode)", "shortest", "straight line", "in… (other mode)", insert a point on the route, add a point of interest, close the loop, delete the last point, center the map, copy coordinates.
-- **Editing**: dragging an anchor recomputes both adjacent legs; clicking on the line inserts an anchor; ⌥-click forces a straight line; ⌫ deletes the selected point (or the last one); ⌘Z / ⇧⌘Z named undo and redo.
+- **Editing**: dragging an anchor recomputes both adjacent legs; clicking on the line inserts an anchor; ⌥-click forces a straight line; ⌫ deletes the selected point (⌘⌥⌫ the last one); ⌘Z / ⇧⌘Z named undo and redo.
 - **Finishing a route**: Back to start (⌘L), Out and back (⇧⌘L), Reverse (⌘I), Recompute everything with the current mode (⇧⌘R), Clear all (⇧⌘⌫).
 - **Base maps** (sidebar, ⌘1 to ⌘9): IGN Plan v2, IGN aerial imagery, OpenStreetMap, OpenTopoMap, CyclOSM, OSM France, Esri satellite, Apple Maps standard / satellite / hybrid. With a Géoplateforme key entered in Settings: IGN topographic map (SCAN 25) and TOP 25. With a Thunderforest key: Outdoors, OpenCycleMap, Landscape (native Retina tiles).
 - **Overlays**: waymarked hiking trails (GR, PR), cycling routes, MTB routes (Waymarked Trails), IGN contour lines, LiDAR HD hillshade, IGN slopes, cadastre.
@@ -29,8 +29,8 @@ The app is not notarized: on first launch, right-click the app and choose Open.
 - **Elevation**: IGN RGE ALTI (metre accuracy) with Valhalla then Open-Meteo as fallbacks; elevation profile synchronized with the map (hover = yellow dot on the route); smoothed ascent and descent (100 m window, 5 m hysteresis); estimated duration (hikers' rule, adjustable speeds).
 - **Files**: the document is a standard `.gpx`. The project (anchors, modes) is embedded in `<metadata><extensions>`: reopenable and editable in Tracé, readable by any other app. Autosave, versions, iCloud Drive.
 - **Automatic saving**: from the first point on, a file is created in `~/Documents/Tracés/` (folder configurable) and rewritten after every change; a named document is saved silently. Can be disabled in Settings.
-- **Import**: open any GPX (Garmin, Strava, Komoot…); "Make editable" converts the track into anchors; missing elevations are filled in.
-- **Export** (⌘E): clean GPX for the Apple Watch (track or route, elevations, points of interest, Douglas-Peucker simplification); the Share button sends it by AirDrop to your iPhone.
+- **Import**: open any GPX (Garmin, Strava, Komoot…); "Make editable" converts the track into anchors; missing elevations are filled in. The original file is never rewritten: edits go to a copy named `<name> (Tracé).gpx` in the routes folder.
+- **Export** (⇧⌘E): clean GPX for the Apple Watch (track or route, elevations, points of interest, Douglas-Peucker simplification); the Share button sends it by AirDrop to your iPhone.
 - **Search**: search field (place, address, or "lat, lon"), My location (⌘⌥L), Fit to route (⌘⏎), kilometre markers (⌘K).
 
 ## Build

@@ -12,8 +12,8 @@ struct InspectorView: View {
     var body: some View {
         Form {
             Section("Tracé") {
-                TextField("Nom", text: Binding(get: { doc.project.name }, set: { doc.rename($0) }))
-                TextField("Notes", text: Binding(get: { doc.project.notes }, set: { doc.setNotes($0) }), axis: .vertical)
+                CommitTextField(title: "Nom", value: doc.project.name) { doc.rename($0) }
+                CommitTextField(title: "Notes", value: doc.project.notes, axis: .vertical) { doc.setNotes($0) }
                     .lineLimit(2...5)
             }
             Section("Statistiques") {
