@@ -121,24 +121,25 @@ struct MapControls: View {
     @ObservedObject var ctx: SceneContext
 
     var body: some View {
-        VStack(spacing: 0) {
-            control("plus", "Zoom avant") { ctx.controller.zoom(by: 2) }
-            Divider().frame(width: 20)
-            control("minus", "Zoom arrière") { ctx.controller.zoom(by: 0.5) }
-        }
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
-        .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(.quaternary))
-        VStack(spacing: 0) {
-            control(ctx.controller.isLocating ? "location.fill" : "location", "Ma position") { ctx.controller.showUserLocation() }
-            Divider().frame(width: 20)
-            control("arrow.up.left.and.arrow.down.right", "Ajuster au tracé") {
-                ctx.controller.zoomToFit(doc.trackPoints.map { .init(latitude: $0.lat, longitude: $0.lon) })
+        VStack(spacing: 8) {
+            VStack(spacing: 0) {
+                control("plus", "Zoom avant") { ctx.controller.zoom(by: 2) }
+                Divider().frame(width: 20)
+                control("minus", "Zoom arrière") { ctx.controller.zoom(by: 0.5) }
             }
-            .disabled(doc.trackPoints.count < 2)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+            .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(.quaternary))
+            VStack(spacing: 0) {
+                control(ctx.controller.isLocating ? "location.fill" : "location", "Ma position") { ctx.controller.showUserLocation() }
+                Divider().frame(width: 20)
+                control("arrow.up.left.and.arrow.down.right", "Ajuster au tracé") {
+                    ctx.controller.zoomToFit(doc.trackPoints.map { .init(latitude: $0.lat, longitude: $0.lon) })
+                }
+                .disabled(doc.trackPoints.count < 2)
+            }
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+            .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(.quaternary))
         }
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
-        .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(.quaternary))
-        .padding(.top, 8)
     }
 
     private func control(_ symbol: String, _ help: String, action: @escaping () -> Void) -> some View {

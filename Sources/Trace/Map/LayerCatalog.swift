@@ -10,8 +10,13 @@ enum LayerCatalog {
         "https://data.geopf.fr/private/wmts?apikey=\(ignKey)&SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}"
     }
 
-    /// Clé Géoplateforme pour les couches SCAN (endpoint privé). Vide = couches SCAN absentes du catalogue.
-    static var ignKey: String { UserDefaults.standard.string(forKey: "ignKey") ?? "" }
+    /// Clé Géoplateforme pour les couches SCAN (endpoint privé). Par défaut la clé partagée `ign_scan_ws` publiée par
+    /// l'IGN pendant la migration Géoplateforme (usage personnel modéré) ; une clé personnelle la remplace dans les Réglages.
+    static let sharedIGNKey = "ign_scan_ws"
+    static var ignKey: String {
+        let k = UserDefaults.standard.string(forKey: "ignKey") ?? ""
+        return k.isEmpty ? sharedIGNKey : k
+    }
     static var thunderforestKey: String { UserDefaults.standard.string(forKey: "thunderforestKey") ?? "" }
 
     static var base: [MapLayer] {

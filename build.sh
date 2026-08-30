@@ -59,8 +59,16 @@ echo "fr" > "${RES_DIR}/.lproj_marker" && rm -f "${RES_DIR}/.lproj_marker"
 mkdir -p "${RES_DIR}/fr.lproj"
 echo 'APPL????' > "${APP_DIR}/Contents/PkgInfo"
 
-echo "==> Signature ad hoc…"
-codesign --force --sign - --identifier "${BUNDLE_ID}" "${APP_DIR}"
+# Identité auto-signée stable si elle existe (./setup-signing.sh) : macOS garde alors les autorisations
+# (localisation) d'une version à l'autre. Sinon signature ad hoc.
+SIGNING_IDENTITY="Trace Developer"
+if security find-identity -v -p codesigning | grep -q "${SIGNING_IDENTITY}"; then
+  echo "==> Signature avec '${SIGNING_IDENTITY}'…"
+  codesign --force --sign "${SIGNING_IDENTITY}" --identifier "${BUNDLE_ID}" --timestamp=none "${APP_DIR}"
+else
+  echo "==> Signature ad hoc (lance ./setup-signing.sh pour une identité stable)…"
+  codesign --force --sign - --identifier "${BUNDLE_ID}" "${APP_DIR}"
+fi
 codesign --verify --strict --verbose=1 "${APP_DIR}" 2>&1 | sed 's/^/    /' || fail "Signature invalide."
 
 echo "==> OK : ${APP_DIR}"

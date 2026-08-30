@@ -23,7 +23,7 @@ Au premier lancement, macOS peut demander de confirmer l'ouverture (app non nota
 - **Clic droit sur la carte** : « Tracer jusqu'ici (mode courant) », « au plus court », « en ligne droite », « en… » (autre mode), insertion d'un point sur le tracé, point d'intérêt, boucle, suppression du dernier point, centrage, copie des coordonnées.
 - **Édition** : glisser une ancre recalcule les deux tronçons voisins ; clic sur la ligne insère une ancre ; ⌥-clic force la ligne droite ; ⌫ supprime le point sélectionné (⌘⌥⌫ le dernier) ; ⌘Z / ⇧⌘Z annuler-rétablir nommés.
 - **Fin de tracé** : Revenir au départ (⌘L), Aller-retour (⇧⌘L), Inverser (⌘I), Recalculer tout avec le mode courant (⇧⌘R), Tout effacer (⇧⌘⌫).
-- **Fonds de carte** (barre latérale, ⌘1 à ⌘9) : Plan IGN v2, Photos aériennes IGN, OpenStreetMap, OpenTopoMap, CyclOSM, OSM France, Satellite Esri, Plans / Satellite / Hybride Apple. Avec une clé Géoplateforme saisie dans les Réglages : Carte topo IGN (SCAN 25) et TOP 25 touristique. Avec une clé Thunderforest : Outdoors, OpenCycleMap, Landscape (Retina natif).
+- **Fonds de carte** (barre latérale, ⌘1 à ⌘9) : Plan IGN v2, Photos aériennes IGN, OpenStreetMap, OpenTopoMap, CyclOSM, OSM France, Satellite Esri, Plans / Satellite / Hybride Apple. Carte topo IGN (SCAN 25) et TOP 25 touristique via la clé Géoplateforme partagée `ign_scan_ws` (usage personnel ; une clé personnelle la remplace dans les Réglages). Avec une clé Thunderforest : Outdoors, OpenCycleMap, Landscape (Retina natif).
 - **Enregistrement automatique** : dès le premier point, un fichier est créé dans `~/Documents/Tracés/` (dossier modifiable) et réécrit à chaque modification ; un document déjà nommé est réenregistré en silence. Désactivable dans les Réglages.
 - **Surcouches** : sentiers balisés (GR, PR), itinéraires vélo, itinéraires VTT (Waymarked Trails), courbes de niveau IGN, estompage LiDAR HD, pentes IGN, cadastre.
 - **Tuiles nettes sur Retina** : assemblage 2x2 des tuiles du niveau supérieur (désactivable), cache disque de 2 Go.
@@ -56,7 +56,7 @@ Lance l'app en mode `--qa`, déroule le scénario (clics, menus, drag, undo, exp
 | Routage | `brouter.de/brouter` (repli `bikerouter.de`, puis OSRM FOSSGIS) | sans clé, altitude incluse ; Randonnée = `hiking-mountain` + `profile:shortest_way=1` (le plus court à pied), option « sentiers balisés » dans les Réglages |
 | Altitude | IGN Géoplateforme `altimetrie/1.0/calcul/alti/rest/elevation.json` | POST JSON, 5 000 points max, nodata `-99999` interpolé ; repli Valhalla `/height`, puis Open-Meteo |
 | Fonds IGN | `data.geopf.fr/wmts` (ouvert) | Plan IGN v2, orthophotos, courbes, estompage, pentes, cadastre : Licence Ouverte |
-| SCAN 25 | `data.geopf.fr/private/wmts?apikey=…` | uniquement avec une clé Géoplateforme saisie dans les Réglages (compte cartes.gouv.fr ; la licence IGN réserve le SCAN 25 aux usages professionnels ou associatifs, l'app n'embarque aucune clé) |
+| SCAN 25 | `data.geopf.fr/private/wmts?apikey=ign_scan_ws` | clé partagée publiée par l'IGN pendant la migration Géoplateforme, usage personnel modéré, révocable sans préavis ; une clé personnelle (compte cartes.gouv.fr, gratuite pour un usage professionnel ou associatif) la remplace dans les Réglages |
 | OSM | tile.openstreetmap.org, OpenTopoMap (max z17), CyclOSM (max z17), OSM France | User-Agent identifiant obligatoire, pas de préchargement |
 | Sentiers | tile.waymarkedtrails.org | overlays hiking / cycling / mtb |
 

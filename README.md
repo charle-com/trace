@@ -23,7 +23,7 @@ The app is not notarized: on first launch, right-click the app and choose Open.
 - **Right-click on the map**: "Route to here (current mode)", "shortest", "straight line", "in… (other mode)", insert a point on the route, add a point of interest, close the loop, delete the last point, center the map, copy coordinates.
 - **Editing**: dragging an anchor recomputes both adjacent legs; clicking on the line inserts an anchor; ⌥-click forces a straight line; ⌫ deletes the selected point (⌘⌥⌫ the last one); ⌘Z / ⇧⌘Z named undo and redo.
 - **Finishing a route**: Back to start (⌘L), Out and back (⇧⌘L), Reverse (⌘I), Recompute everything with the current mode (⇧⌘R), Clear all (⇧⌘⌫).
-- **Base maps** (sidebar, ⌘1 to ⌘9): IGN Plan v2, IGN aerial imagery, OpenStreetMap, OpenTopoMap, CyclOSM, OSM France, Esri satellite, Apple Maps standard / satellite / hybrid. With a Géoplateforme key entered in Settings: IGN topographic map (SCAN 25) and TOP 25. With a Thunderforest key: Outdoors, OpenCycleMap, Landscape (native Retina tiles).
+- **Base maps** (sidebar, ⌘1 to ⌘9): IGN Plan v2, IGN aerial imagery, OpenStreetMap, OpenTopoMap, CyclOSM, OSM France, Esri satellite, Apple Maps standard / satellite / hybrid. IGN topographic map (SCAN 25) and TOP 25 through the shared Géoplateforme key `ign_scan_ws` (personal use; your own key can replace it in Settings). With a Thunderforest key: Outdoors, OpenCycleMap, Landscape (native Retina tiles).
 - **Overlays**: waymarked hiking trails (GR, PR), cycling routes, MTB routes (Waymarked Trails), IGN contour lines, LiDAR HD hillshade, IGN slopes, cadastre.
 - **Crisp tiles on Retina displays**: 2x2 assembly of the next zoom level (can be disabled), 2 GB disk cache.
 - **Elevation**: IGN RGE ALTI (metre accuracy) with Valhalla then Open-Meteo as fallbacks; elevation profile synchronized with the map (hover = yellow dot on the route); smoothed ascent and descent (100 m window, 5 m hysteresis); estimated duration (hikers' rule, adjustable speeds).
@@ -56,7 +56,7 @@ Launches the app in `--qa` mode, runs the scenario (clicks, menus, drag, undo, e
 | Routing | `brouter.de/brouter` (fallback `bikerouter.de`, then OSRM by FOSSGIS) | no key, elevation included; Hiking = `hiking-mountain` + `profile:shortest_way=1` (true shortest path on foot), "prefer waymarked trails" option in Settings |
 | Elevation | IGN Géoplateforme `altimetrie/1.0/calcul/alti/rest/elevation.json` | JSON POST, 5,000 points max, `-99999` nodata interpolated; fallback Valhalla `/height`, then Open-Meteo |
 | IGN base maps | `data.geopf.fr/wmts` (open) | Plan IGN v2, aerial imagery, contours, hillshade, slopes, cadastre: Etalab open licence |
-| SCAN 25 | `data.geopf.fr/private/wmts?apikey=…` | only with a Géoplateforme key entered in Settings (cartes.gouv.fr account; the IGN licence restricts SCAN 25 to professional or non-profit use, the app ships no key) |
+| SCAN 25 | `data.geopf.fr/private/wmts?apikey=ign_scan_ws` | shared key published by IGN during the Géoplateforme migration, moderate personal use, may be revoked without notice; a personal key (cartes.gouv.fr account, free for professional or non-profit use) can replace it in Settings |
 | OSM | tile.openstreetmap.org, OpenTopoMap (max z17), CyclOSM (max z17), OSM France | identifying User-Agent required, no bulk download |
 | Trails | tile.waymarkedtrails.org | hiking / cycling / mtb overlays |
 

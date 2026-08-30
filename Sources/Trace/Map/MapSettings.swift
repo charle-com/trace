@@ -88,14 +88,26 @@ final class MapController: ObservableObject {
             locationError = "La localisation est refusée pour Tracé. Autorisez-la dans Réglages Système > Confidentialité et sécurité > Service de localisation, ou vérifiez que le service est activé."
         default:
             mapView?.showsUserLocation = true
-            lm.requestLocation()
+            lm.startUpdatingLocation()
+        }
+    }
+
+    /// Statut d'autorisation lisible (QA).
+    var locationStatus: String {
+        guard let lm = locationManager else { return "aucun gestionnaire" }
+        switch lm.authorizationStatus {
+        case .notDetermined: return "notDetermined"
+        case .restricted: return "restricted"
+        case .denied: return "denied"
+        case .authorizedAlways: return "authorizedAlways"
+        default: return "autre"
         }
     }
 
     fileprivate func locationAuthorized() {
         guard wantsLocation, let lm = locationManager else { return }
         mapView?.showsUserLocation = true
-        lm.requestLocation()
+        lm.startUpdatingLocation()
     }
 
     fileprivate func locationDenied() {
@@ -109,13 +121,18 @@ final class MapController: ObservableObject {
         guard wantsLocation else { return }
         wantsLocation = false
         isLocating = false
+        locationManager?.stopUpdatingLocation()
+        mapView?.showsUserLocation = true
         center(on: loc.coordinate, zoom: 14)
     }
 
     fileprivate func locationFailed(_ error: Error) {
         guard wantsLocation else { return }
+        // kCLErrorLocationUnknown est transitoire avec startUpdatingLocation : on attend la suite.
+        if let e = error as? CLError, e.code == .locationUnknown { return }
         wantsLocation = false
         isLocating = false
+        locationManager?.stopUpdatingLocation()
         if let e = error as? CLError, e.code == .denied {
             locationDenied()
             wantsLocation = false

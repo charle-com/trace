@@ -92,6 +92,11 @@ enum QARunner {
                 try? await Task.sleep(nanoseconds: 5_000_000_000)
                 note("édition : ancres \(doc.project.anchors.count), fichier \(doc.nsDocument?.fileURL?.lastPathComponent ?? "aucun")")
             }
+        case "locate":
+            scene.controller.showUserLocation()
+            try? await Task.sleep(nanoseconds: 12_000_000_000)
+            let map = scene.controller.mapView
+            note("localisation : statut \(scene.controller.locationStatus), erreur \(scene.controller.locationError ?? "aucune"), showsUserLocation \(map?.showsUserLocation ?? false), position \(map?.userLocation.location.map { "\($0.coordinate.latitude), \($0.coordinate.longitude)" } ?? "nil"), centre \(scene.controller.centerCoordinate.latitude), \(scene.controller.centerCoordinate.longitude)")
         case "gestures":
             gestureLog = await gestures(doc: doc, scene: scene, note: note)
             note("après gestes : ancres \(doc.project.anchors.count)")

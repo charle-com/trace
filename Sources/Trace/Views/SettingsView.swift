@@ -33,8 +33,8 @@ struct SettingsView: View {
                     .font(.caption).foregroundStyle(.secondary)
             }
             Section("Cartes IGN") {
-                TextField("Clé Géoplateforme (couches SCAN 25)", text: $ignKey)
-                Text("Sans clé, seuls Plan IGN et photos aériennes (licence ouverte) sont proposés. Avec une clé, la Carte topo IGN (SCAN 25) et la TOP 25 apparaissent dans la barre latérale. Clé à obtenir sur cartes.gouv.fr (gratuite pour un usage professionnel ou associatif).")
+                TextField("Clé Géoplateforme (couches SCAN 25)", text: $ignKey, prompt: Text(LayerCatalog.sharedIGNKey))
+                Text("Vide = clé partagée « ign_scan_ws » (usage personnel modéré, peut être coupée par l'IGN sans préavis). Une clé personnelle s'obtient avec un compte cartes.gouv.fr (gratuite pour un usage professionnel ou associatif).")
                     .font(.caption).foregroundStyle(.secondary)
             }
             Section("Thunderforest (optionnel)") {
