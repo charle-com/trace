@@ -2,7 +2,7 @@
 
 > English version: [README.md](README.md)
 
-![macOS 14+](https://img.shields.io/badge/macOS-14%2B-black) ![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-black) ![Swift](https://img.shields.io/badge/Swift-5.10-orange) ![License](https://img.shields.io/badge/licence-MIT-blue)
+![macOS 14+](https://img.shields.io/badge/macOS-14%2B-black) ![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-black) ![Version](https://img.shields.io/github/v/release/charle-com/trace?color=6E5EFF) ![Swift](https://img.shields.io/badge/Swift-5.10-orange) ![License](https://img.shields.io/badge/licence-MIT-blue)
 
 Éditeur de traces GPX natif pour macOS (SwiftUI + MapKit), pensé pour préparer des sorties rando, vélo, VTT ou course et les envoyer sur l'Apple Watch. Remplace en local calculitineraires.fr et l'outil de tracé Visorando. Aucun compte, aucune clé obligatoire, aucun serveur à soi : routage BRouter, altitudes IGN, fonds IGN et OpenStreetMap.
 

@@ -2,7 +2,7 @@
 
 > Version française : [README.fr.md](README.fr.md)
 
-![macOS 14+](https://img.shields.io/badge/macOS-14%2B-black) ![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-black) ![Swift](https://img.shields.io/badge/Swift-5.10-orange) ![License](https://img.shields.io/badge/license-MIT-blue)
+![macOS 14+](https://img.shields.io/badge/macOS-14%2B-black) ![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-black) ![Version](https://img.shields.io/github/v/release/charle-com/trace?color=6E5EFF) ![Swift](https://img.shields.io/badge/Swift-5.10-orange) ![License](https://img.shields.io/badge/license-MIT-blue)
 
 A native GPX route editor for macOS (SwiftUI + MapKit). Plan hikes, road rides, gravel or MTB loops and runs, then export a clean GPX for your Apple Watch or any app. A local, native alternative to web route planners such as calculitineraires.fr, Visorando or gpx.studio: no account, no mandatory API key, no server of your own. Routing by BRouter, elevation by IGN, base maps by IGN and OpenStreetMap, all served for free at moderate use.
 
