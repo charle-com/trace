@@ -28,6 +28,7 @@ final class WaypointAnnotation: MKPointAnnotation {
 }
 
 final class HoverAnnotation: MKPointAnnotation {}
+final class UserDotAnnotation: MKPointAnnotation {}
 
 final class KmAnnotation: MKPointAnnotation {
     let km: Int
@@ -141,6 +142,7 @@ struct MapView: NSViewRepresentable {
         c.syncRoute(force: false)
         c.syncAnnotations()
         c.syncHover()
+        c.syncUserDot()
     }
 
     func makeCoordinator() -> Coordinator { Coordinator(doc: doc, settings: settings, controller: controller) }
@@ -162,6 +164,7 @@ struct MapView: NSViewRepresentable {
         private var waypointAnnotations: [UUID: WaypointAnnotation] = [:]
         private var kmAnnotations: [KmAnnotation] = []
         private var hoverAnnotation: HoverAnnotation?
+        private var userDot: UserDotAnnotation?
         private var draggingID: UUID?
         private var pendingClick: DispatchWorkItem?
         private var lastMouseLegHit: Int?
@@ -349,6 +352,21 @@ struct MapView: NSViewRepresentable {
             }
         }
 
+        func syncUserDot() {
+            guard let map else { return }
+            if let c = controller.userCoordinate {
+                if let d = userDot { d.coordinate = c } else {
+                    let d = UserDotAnnotation()
+                    d.coordinate = c
+                    userDot = d
+                    map.addAnnotation(d)
+                }
+            } else if let d = userDot {
+                map.removeAnnotation(d)
+                userDot = nil
+            }
+        }
+
         // MARK: Délégué MapKit
 
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
@@ -394,6 +412,16 @@ struct MapView: NSViewRepresentable {
                 v.glyphImage = NSImage(systemSymbolName: "mappin", accessibilityDescription: nil)
                 v.titleVisibility = .adaptive
                 v.displayPriority = .required
+                return v
+            }
+            if annotation is UserDotAnnotation {
+                let id = "userdot"
+                let v = mapView.dequeueReusableAnnotationView(withIdentifier: id) ?? MKAnnotationView(annotation: annotation, reuseIdentifier: id)
+                v.annotation = annotation
+                v.image = Self.userDotImage()
+                v.isEnabled = false
+                v.displayPriority = .required
+                v.zPriority = .max
                 return v
             }
             if annotation is HoverAnnotation {
@@ -688,6 +716,27 @@ struct MapView: NSViewRepresentable {
                 return true
             }
             return img
+        }
+
+        /// Point bleu « Ma position » : halo translucide, disque bleu cerclé de blanc.
+        static func userDotImage() -> NSImage {
+            let size: CGFloat = 40
+            return NSImage(size: NSSize(width: size, height: size), flipped: false) { rect in
+                NSColor.systemBlue.withAlphaComponent(0.18).setFill()
+                NSBezierPath(ovalIn: rect).fill()
+                let r = rect.insetBy(dx: 12, dy: 12)
+                let shadow = NSShadow()
+                shadow.shadowBlurRadius = 3
+                shadow.shadowOffset = NSSize(width: 0, height: -1)
+                shadow.shadowColor = NSColor.black.withAlphaComponent(0.35)
+                shadow.set()
+                NSColor.white.setFill()
+                NSBezierPath(ovalIn: r).fill()
+                NSShadow().set()
+                NSColor.systemBlue.setFill()
+                NSBezierPath(ovalIn: r.insetBy(dx: 2.5, dy: 2.5)).fill()
+                return true
+            }
         }
 
         static func kmImage(km: Int) -> NSImage {

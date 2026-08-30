@@ -35,6 +35,8 @@ final class MapController: ObservableObject {
     /// Message d'erreur de localisation à afficher (autorisation refusée, service coupé…).
     @Published var locationError: String?
     @Published var isLocating = false
+    /// Dernière position connue : dessinée par l'app (le point bleu de MapKit est caché par les tuiles qui remplacent la carte).
+    @Published var userCoordinate: CLLocationCoordinate2D?
 
     private var locationManager: CLLocationManager?
     private var locationDelegate: LocationDelegate?
@@ -78,6 +80,7 @@ final class MapController: ObservableObject {
         locationDelegate = d
         lm.delegate = d
         lm.desiredAccuracy = kCLLocationAccuracyHundredMeters
+        lm.distanceFilter = 10
         wantsLocation = true
         isLocating = true
         switch lm.authorizationStatus {
@@ -118,11 +121,11 @@ final class MapController: ObservableObject {
     }
 
     fileprivate func locationReceived(_ loc: CLLocation) {
+        userCoordinate = loc.coordinate
         guard wantsLocation else { return }
         wantsLocation = false
         isLocating = false
-        locationManager?.stopUpdatingLocation()
-        mapView?.showsUserLocation = true
+        // Le suivi continue (filtre 10 m) pour que le point bleu reste à jour.
         center(on: loc.coordinate, zoom: 14)
     }
 
