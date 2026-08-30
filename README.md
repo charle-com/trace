@@ -1,70 +1,74 @@
 # Tracé
 
-Éditeur de traces GPX natif pour macOS (SwiftUI + MapKit), pensé pour préparer des sorties rando, vélo, VTT ou course et les envoyer sur l'Apple Watch. Remplace en local calculitineraires.fr et l'outil de tracé Visorando. Aucun compte, aucune clé obligatoire, aucun serveur à soi : routage BRouter, altitudes IGN, fonds IGN et OpenStreetMap.
+> Version française : [README.fr.md](README.fr.md)
 
-![Tracé sur macOS](docs/screenshot.png)
+![macOS 14+](https://img.shields.io/badge/macOS-14%2B-black) ![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-black) ![Swift](https://img.shields.io/badge/Swift-5.10-orange) ![License](https://img.shields.io/badge/license-MIT-blue)
 
-## Installer
+A native GPX route editor for macOS (SwiftUI + MapKit). Plan hikes, road rides, gravel or MTB loops and runs, then export a clean GPX for your Apple Watch or any app. A local, native alternative to web route planners such as calculitineraires.fr, Visorando or gpx.studio: no account, no mandatory API key, no server of your own. Routing by BRouter, elevation by IGN, base maps by IGN and OpenStreetMap, all served for free at moderate use.
+
+![Tracé on macOS](docs/screenshot.png)
+
+## Install
 
 ```bash
 git clone https://github.com/charle-com/trace.git && cd trace
-./build.sh --install     # exige Xcode ; produit /Applications/Tracé.app (signature ad hoc)
+./build.sh --install     # requires Xcode; produces /Applications/Tracé.app (ad hoc signature)
 ```
 
-Au premier lancement, macOS peut demander de confirmer l'ouverture (app non notarisée) : clic droit sur l'app → Ouvrir.
+The app is not notarized: on first launch, right-click the app and choose Open.
 
-## Ce que fait l'app
+## Features
 
-- **Tracer par points d'ancrage** : clic gauche = nouveau point, l'itinéraire entre deux points est calculé automatiquement (BRouter) selon le mode : Randonnée, Vélo route, Gravel, VTT, Au plus court, Voiture, Ligne droite.
-- **Clic droit sur la carte** : « Tracer jusqu'ici (mode courant) », « au plus court », « en ligne droite », « en… » (autre mode), insertion d'un point sur le tracé, point d'intérêt, boucle, suppression du dernier point, centrage, copie des coordonnées.
-- **Édition** : glisser une ancre recalcule les deux tronçons voisins ; clic sur la ligne insère une ancre ; ⌥-clic force la ligne droite ; ⌫ supprime le point sélectionné (sinon le dernier) ; ⌘Z / ⇧⌘Z annuler-rétablir nommés.
-- **Fin de tracé** : Revenir au départ (⌘L), Aller-retour (⇧⌘L), Inverser (⌘I), Recalculer tout avec le mode courant (⇧⌘R), Tout effacer (⇧⌘⌫).
-- **Fonds de carte** (barre latérale, ⌘1 à ⌘9) : Plan IGN v2, Photos aériennes IGN, OpenStreetMap, OpenTopoMap, CyclOSM, OSM France, Satellite Esri, Plans / Satellite / Hybride Apple. Avec une clé Géoplateforme saisie dans les Réglages : Carte topo IGN (SCAN 25) et TOP 25 touristique. Avec une clé Thunderforest : Outdoors, OpenCycleMap, Landscape (Retina natif).
-- **Enregistrement automatique** : dès le premier point, un fichier est créé dans `~/Documents/Tracés/` (dossier modifiable) et réécrit à chaque modification ; un document déjà nommé est réenregistré en silence. Désactivable dans les Réglages.
-- **Surcouches** : sentiers balisés (GR, PR), itinéraires vélo, itinéraires VTT (Waymarked Trails), courbes de niveau IGN, estompage LiDAR HD, pentes IGN, cadastre.
-- **Tuiles nettes sur Retina** : assemblage 2x2 des tuiles du niveau supérieur (désactivable), cache disque de 2 Go.
-- **Altitudes** : IGN RGE ALTI (précision métrique) avec repli Valhalla puis Open-Meteo, profil altimétrique synchronisé avec la carte (survol = point jaune sur le tracé), D+ / D- lissés (fenêtre 100 m, hystérésis 5 m), durée estimée (règle des randonneurs, vitesses réglables).
-- **Fichiers** : le document est un GPX standard (`.gpx`). Le projet (ancres, modes) est embarqué dans `<metadata><extensions>` : rouvrable et éditable dans Tracé, lisible par n'importe quelle app. Autosave, versions, iCloud Drive.
-- **Import** : ouvrir n'importe quel GPX (Garmin, Strava, Komoot…) ; « Rendre éditable » convertit la trace en ancres ; altitudes complétées si absentes.
-- **Export** (⌘E) : GPX propre pour l'Apple Watch (trace ou route, altitudes, points d'intérêt, simplification Douglas-Peucker au choix) ; bouton Partager = AirDrop vers l'iPhone.
-- **Recherche** : champ de recherche (lieu, adresse, ou « lat, lon »), Ma position (⌘⌥L), Ajuster au tracé (⌘⏎), marqueurs kilométriques (⌘K).
+- **Draw by anchor points**: left-click adds a point, the route between two points is computed automatically (BRouter) according to the active mode: Hiking, Road bike, Gravel, MTB, Shortest, Car, Straight line.
+- **Right-click on the map**: "Route to here (current mode)", "shortest", "straight line", "in… (other mode)", insert a point on the route, add a point of interest, close the loop, delete the last point, center the map, copy coordinates.
+- **Editing**: dragging an anchor recomputes both adjacent legs; clicking on the line inserts an anchor; ⌥-click forces a straight line; ⌫ deletes the selected point (or the last one); ⌘Z / ⇧⌘Z named undo and redo.
+- **Finishing a route**: Back to start (⌘L), Out and back (⇧⌘L), Reverse (⌘I), Recompute everything with the current mode (⇧⌘R), Clear all (⇧⌘⌫).
+- **Base maps** (sidebar, ⌘1 to ⌘9): IGN Plan v2, IGN aerial imagery, OpenStreetMap, OpenTopoMap, CyclOSM, OSM France, Esri satellite, Apple Maps standard / satellite / hybrid. With a Géoplateforme key entered in Settings: IGN topographic map (SCAN 25) and TOP 25. With a Thunderforest key: Outdoors, OpenCycleMap, Landscape (native Retina tiles).
+- **Overlays**: waymarked hiking trails (GR, PR), cycling routes, MTB routes (Waymarked Trails), IGN contour lines, LiDAR HD hillshade, IGN slopes, cadastre.
+- **Crisp tiles on Retina displays**: 2x2 assembly of the next zoom level (can be disabled), 2 GB disk cache.
+- **Elevation**: IGN RGE ALTI (metre accuracy) with Valhalla then Open-Meteo as fallbacks; elevation profile synchronized with the map (hover = yellow dot on the route); smoothed ascent and descent (100 m window, 5 m hysteresis); estimated duration (hikers' rule, adjustable speeds).
+- **Files**: the document is a standard `.gpx`. The project (anchors, modes) is embedded in `<metadata><extensions>`: reopenable and editable in Tracé, readable by any other app. Autosave, versions, iCloud Drive.
+- **Automatic saving**: from the first point on, a file is created in `~/Documents/Tracés/` (folder configurable) and rewritten after every change; a named document is saved silently. Can be disabled in Settings.
+- **Import**: open any GPX (Garmin, Strava, Komoot…); "Make editable" converts the track into anchors; missing elevations are filled in.
+- **Export** (⌘E): clean GPX for the Apple Watch (track or route, elevations, points of interest, Douglas-Peucker simplification); the Share button sends it by AirDrop to your iPhone.
+- **Search**: search field (place, address, or "lat, lon"), My location (⌘⌥L), Fit to route (⌘⏎), kilometre markers (⌘K).
 
-## Construire
+## Build
 
 ```bash
 ./build.sh            # release, build/Tracé.app
-./build.sh --debug    # debug
-./build.sh --install  # copie dans /Applications
-swift test            # tests du cœur (DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer)
+./build.sh --debug    # debug build
+./build.sh --install  # copies to /Applications
+swift test            # core tests (DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer)
 ```
 
-Exige Xcode (toolchain) ; pas de projet Xcode, tout passe par SwiftPM. Signature ad hoc.
+Requires the Xcode toolchain; there is no Xcode project, everything goes through SwiftPM. Ad hoc code signature.
 
-## QA automatisée
+## Automated QA
 
-`./qa.sh <dossier> --scenario route|gestures|open [--open f.gpx] [--layer id] [--overlay a,b] [--profile raw]`
-Lance l'app en mode `--qa`, déroule le scénario (clics, menus, drag, undo, export), capture la fenêtre (`window.png` si l'écran est déverrouillé, `window-cache.png` sinon) et écrit `result.json`, `export.gpx`, `work.gpx`.
+`./qa.sh <folder> --scenario route|gestures|open [--open file.gpx] [--layer id] [--overlay a,b] [--profile raw]`
+Launches the app in `--qa` mode, runs the scenario (clicks, menus, drag, undo, export), captures the window (`window.png` when the screen is unlocked, `window-cache.png` otherwise) and writes `result.json`, `export.gpx` and `work.gpx`.
 
-## Sources de données (vérifiées le 30/08/2026)
+## Data sources (verified 2026-08-30)
 
-| Usage | Service | Remarques |
+| Purpose | Service | Notes |
 |---|---|---|
-| Routage | `brouter.de/brouter` (repli `bikerouter.de`, puis OSRM FOSSGIS) | sans clé, altitude incluse ; Randonnée = `hiking-mountain` + `profile:shortest_way=1` (le plus court à pied), option « sentiers balisés » dans les Réglages |
-| Altitude | IGN Géoplateforme `altimetrie/1.0/calcul/alti/rest/elevation.json` | POST JSON, 5 000 points max, nodata `-99999` interpolé ; repli Valhalla `/height`, puis Open-Meteo |
-| Fonds IGN | `data.geopf.fr/wmts` (ouvert) | Plan IGN v2, orthophotos, courbes, estompage, pentes, cadastre : Licence Ouverte |
-| SCAN 25 | `data.geopf.fr/private/wmts?apikey=…` | uniquement avec une clé Géoplateforme saisie dans les Réglages (compte cartes.gouv.fr ; la licence IGN réserve le SCAN 25 aux usages professionnels ou associatifs, l'app n'embarque aucune clé) |
-| OSM | tile.openstreetmap.org, OpenTopoMap (max z17), CyclOSM (max z17), OSM France | User-Agent identifiant obligatoire, pas de préchargement |
-| Sentiers | tile.waymarkedtrails.org | overlays hiking / cycling / mtb |
+| Routing | `brouter.de/brouter` (fallback `bikerouter.de`, then OSRM by FOSSGIS) | no key, elevation included; Hiking = `hiking-mountain` + `profile:shortest_way=1` (true shortest path on foot), "prefer waymarked trails" option in Settings |
+| Elevation | IGN Géoplateforme `altimetrie/1.0/calcul/alti/rest/elevation.json` | JSON POST, 5,000 points max, `-99999` nodata interpolated; fallback Valhalla `/height`, then Open-Meteo |
+| IGN base maps | `data.geopf.fr/wmts` (open) | Plan IGN v2, aerial imagery, contours, hillshade, slopes, cadastre: Etalab open licence |
+| SCAN 25 | `data.geopf.fr/private/wmts?apikey=…` | only with a Géoplateforme key entered in Settings (cartes.gouv.fr account; the IGN licence restricts SCAN 25 to professional or non-profit use, the app ships no key) |
+| OSM | tile.openstreetmap.org, OpenTopoMap (max z17), CyclOSM (max z17), OSM France | identifying User-Agent required, no bulk download |
+| Trails | tile.waymarkedtrails.org | hiking / cycling / mtb overlays |
 
-## Licence
+## License
 
-Code sous licence MIT. Les fonds de carte et services restent soumis à leurs propres conditions (IGN Géoplateforme, OpenStreetMap, OpenTopoMap, CyclOSM, Waymarked Trails, BRouter, FOSSGIS) : usage personnel modéré, pas de téléchargement massif.
+MIT for the code. Map tiles and services remain subject to their own terms (IGN Géoplateforme, OpenStreetMap, OpenTopoMap, CyclOSM, Waymarked Trails, BRouter, FOSSGIS): moderate personal use, no mass download.
 
-## Structure
+## Project layout
 
-- `Sources/TraceCore` : géométrie (haversine, Douglas-Peucker, tuiles), lecture/écriture GPX, modèle de projet (ancres, tronçons, POI), statistiques et profil. Testé par `Tests/TraceCoreTests`.
-- `Sources/Trace/Model` : document (`ReferenceFileDocument`, undo), protocoles de services.
-- `Sources/Trace/Services` : `RoutingHub` (BRouter + replis + cache), `ElevationHub` (IGN + replis + cache).
-- `Sources/Trace/Map` : `MapView` (MKMapView, gestes, menu contextuel, annotations, polylignes), `TileOverlay` (tuiles + assemblage Retina), `LayerCatalog`, `MapSettings`.
-- `Sources/Trace/Views` : fenêtre (split view, inspecteur, barre d'outils), barre latérale, profil altimétrique, export, menus, réglages.
-- `Sources/Trace/QARunner.swift` : mode `--qa`.
+- `Sources/TraceCore`: geometry (haversine, Douglas-Peucker, tile maths), GPX reader/writer, project model (anchors, legs, POIs), statistics and profile. Covered by `Tests/TraceCoreTests`.
+- `Sources/Trace/Model`: document (`ReferenceFileDocument`, undo, autosave), service protocols.
+- `Sources/Trace/Services`: `RoutingHub` (BRouter + fallbacks + cache), `ElevationHub` (IGN + fallbacks + cache).
+- `Sources/Trace/Map`: `MapView` (MKMapView, gestures, context menu, annotations, polylines), `TileOverlay` (tiles + Retina assembly), `LayerCatalog`, `MapSettings`.
+- `Sources/Trace/Views`: window (split view, inspector, toolbar), sidebar, elevation profile, export sheet, menus, settings.
+- `Sources/Trace/QARunner.swift`: `--qa` mode.
