@@ -301,26 +301,28 @@ final class TraceDocument: @preconcurrency ReferenceFileDocument {
         computeLeg(id: leg.id)
     }
 
-    /// Recalcule tous les tronçons avec le profil donné (ou leur profil propre).
-    func recomputeAllLegs(with profile: RoutingProfile? = nil) {
+    /// Recalcule tous les tronçons avec le profil donné (ou leur profil propre). Les tronçons en ligne droite qui portent
+    /// une géométrie importée (trace GPX rendue éditable) sont conservés tels quels.
+    func recomputeAllLegs(with profile: RoutingProfile? = nil, actionName: String = "Recalculer le tracé") {
         var p = project
         var ids: [UUID] = []
         for i in p.legs.indices {
-            let prof = profile ?? p.legs[i].profile
+            let old = p.legs[i]
+            if old.profile == .straight && old.points.count > 2 { continue }
+            let prof = profile ?? old.profile
             let leg = Leg(id: UUID(), profile: prof, points: Geo.straightLine(from: p.anchors[i].point, to: p.anchors[i + 1].point))
             p.legs[i] = leg
             ids.append(leg.id)
         }
         if let profile { p.defaultProfile = profile }
-        commit(p, actionName: "Recalculer le tracé")
+        commit(p, actionName: actionName)
         ids.forEach { computeLeg(id: $0) }
     }
 
+    /// Changer le mode (barre d'outils, menu, ⌘⌥1 à 7) recalcule tout le tracé avec ce mode.
     func setDefaultProfile(_ profile: RoutingProfile) {
         guard project.defaultProfile != profile else { return }
-        var p = project
-        p.defaultProfile = profile
-        commit(p, actionName: "Changer le mode")
+        recomputeAllLegs(with: profile, actionName: "Passer en \(profile.title.lowercased())")
     }
 
     func rename(_ name: String) {

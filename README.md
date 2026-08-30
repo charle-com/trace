@@ -22,7 +22,8 @@ The app is not notarized: on first launch, right-click the app and choose Open.
 - **Draw by anchor points**: left-click adds a point, the route between two points is computed automatically (BRouter) according to the active mode: Hiking, Road bike, Gravel, MTB, Shortest, Car, Straight line.
 - **Right-click on the map**: "Route to here (current mode)", "shortest", "straight line", "in… (other mode)", insert a point on the route, add a point of interest, close the loop, delete the last point, center the map, copy coordinates.
 - **Editing**: dragging an anchor recomputes both adjacent legs; clicking on the line inserts an anchor; ⌥-click forces a straight line; ⌫ deletes the selected point (⌘⌥⌫ the last one); ⌘Z / ⇧⌘Z named undo and redo.
-- **Finishing a route**: Back to start (⌘L), Out and back (⇧⌘L), Reverse (⌘I), Recompute everything with the current mode (⇧⌘R), Clear all (⇧⌘⌫).
+- **Changing the mode** (toolbar, ⌘⌥1 to ⌘⌥7) recomputes every leg of the route with that mode, as one undoable action; a single leg can still get its own mode from its context menu or the inspector.
+- **Finishing a route**: Back to start (⌘L), Out and back (⇧⌘L), Reverse (⌘I), Recompute everything (⇧⌘R), Clear all (⇧⌘⌫).
 - **Base maps** (sidebar, ⌘1 to ⌘9): IGN Plan v2, IGN aerial imagery, OpenStreetMap, OpenTopoMap, CyclOSM, OSM France, Esri satellite, Apple Maps standard / satellite / hybrid. IGN topographic map (SCAN 25) and TOP 25 through the shared Géoplateforme key `ign_scan_ws` (personal use; your own key can replace it in Settings). With a Thunderforest key: Outdoors, OpenCycleMap, Landscape (native Retina tiles).
 - **Overlays**: waymarked hiking trails (GR, PR), cycling routes, MTB routes (Waymarked Trails), IGN contour lines, LiDAR HD hillshade, IGN slopes, cadastre.
 - **Crisp tiles on Retina displays**: 2x2 assembly of the next zoom level (can be disabled), 2 GB disk cache.
