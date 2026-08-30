@@ -19,6 +19,7 @@ Au premier lancement, macOS peut demander de confirmer l'ouverture (app non nota
 
 ## Ce que fait l'app
 
+- **Fenêtre de bienvenue** au lancement (⇧⌘1 ensuite) : nommer un nouveau tracé et choisir son mode, ou rouvrir une trace récente (nom, date, distance, D+) d'un double-clic.
 - **Tracer par points d'ancrage** : clic gauche = nouveau point, l'itinéraire entre deux points est calculé automatiquement (BRouter) selon le mode : Randonnée, Vélo route, Gravel, VTT, Au plus court, Voiture, Ligne droite.
 - **Clic droit sur la carte** : « Tracer jusqu'ici (mode courant) », « au plus court », « en ligne droite », « en… » (autre mode), insertion d'un point sur le tracé, point d'intérêt, boucle, suppression du dernier point, centrage, copie des coordonnées.
 - **Édition** : glisser une ancre recalcule les deux tronçons voisins ; clic sur la ligne insère une ancre ; ⌥-clic force la ligne droite ; ⌫ supprime le point sélectionné (⌘⌥⌫ le dernier) ; ⌘Z / ⇧⌘Z annuler-rétablir nommés.

@@ -22,5 +22,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         QARunner.startIfRequested()
     }
 
-    func applicationShouldOpenUntitledFile(_ sender: NSApplication) -> Bool { true }
+    /// Au lancement sans document (et au clic sur le Dock sans fenêtre) : fenêtre de bienvenue plutôt qu'un « Sans titre ».
+    func applicationShouldOpenUntitledFile(_ sender: NSApplication) -> Bool {
+        if QARunner.enabled { return true }
+        let show = UserDefaults.standard.object(forKey: "showWelcome") == nil ? true : UserDefaults.standard.bool(forKey: "showWelcome")
+        guard show else { return true }
+        Task { @MainActor in WelcomeController.shared.show() }
+        return false
+    }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag { Task { @MainActor in WelcomeController.shared.show() } ; return false }
+        return true
+    }
 }

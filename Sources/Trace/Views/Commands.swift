@@ -73,6 +73,10 @@ struct TraceCommands: Commands {
             Button("Inspecteur") { scene?.showInspector.toggle() }
                 .keyboardShortcut("i", modifiers: [.command, .option])
         }
+        CommandGroup(after: .windowList) {
+            Button("Bienvenue dans Tracé") { WelcomeController.shared.show() }
+                .keyboardShortcut("1", modifiers: [.command, .shift])
+        }
         CommandGroup(replacing: .help) {
             Button("Aide Tracé") { NSWorkspace.shared.open(URL(string: "https://charlesneveu.fr")!) }
         }

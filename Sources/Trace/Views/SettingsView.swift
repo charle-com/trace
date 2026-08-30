@@ -6,9 +6,13 @@ struct SettingsView: View {
     @AppStorage("preferMarkedTrails") private var preferMarkedTrails = false
     @AppStorage("autosave") private var autosave = true
     @AppStorage("autosaveFolder") private var autosaveFolder = ""
+    @AppStorage("showWelcome") private var showWelcome = true
 
     var body: some View {
         Form {
+            Section("Lancement") {
+                Toggle("Fenêtre de bienvenue au lancement (traces récentes, nouveau tracé)", isOn: $showWelcome)
+            }
             Section("Enregistrement") {
                 Toggle("Enregistrer automatiquement après chaque modification", isOn: $autosave)
                 LabeledContent("Dossier des nouveaux tracés") {

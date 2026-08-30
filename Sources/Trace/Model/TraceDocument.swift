@@ -48,8 +48,15 @@ final class TraceDocument: @preconcurrency ReferenceFileDocument {
     /// Résultats de routage arrivés pour un tronçon disparu (Annuler pendant le calcul) : réappliqués si Rétablir le ramène.
     private var orphanLegResults: [UUID: (points: [TrackPoint], fallback: Bool)] = [:]
 
+    /// Nom et mode choisis dans la fenêtre de bienvenue, consommés par le prochain document créé.
+    nonisolated(unsafe) static var pendingName: String?
+    nonisolated(unsafe) static var pendingProfile: RoutingProfile?
+
     init() {
-        project = RouteProject()
+        var p = RouteProject()
+        if let n = Self.pendingName { p.name = n; Self.pendingName = nil }
+        if let prof = Self.pendingProfile { p.defaultProfile = prof; Self.pendingProfile = nil }
+        project = p
         Self.all.append(WeakBox(self))
     }
 
@@ -545,9 +552,10 @@ final class TraceDocument: @preconcurrency ReferenceFileDocument {
             isCreatingFile = true
             let folder = Self.autosaveFolder
             try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            let named = project.name.trimmingCharacters(in: .whitespaces)
             let base = openedForeignFile
                 ? (nsdoc.fileURL?.deletingPathExtension().lastPathComponent ?? "Tracé") + " (Tracé)"
-                : Self.defaultFileName()
+                : (named.isEmpty || named == "Nouveau tracé" ? Self.defaultFileName() : named.replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ":", with: "-"))
             let url = Self.uniqueURL(in: folder, base: base)
             let name = url.deletingPathExtension().lastPathComponent
             if project.name == "Nouveau tracé" || project.name.isEmpty { project.name = name }

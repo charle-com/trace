@@ -19,6 +19,7 @@ The app is not notarized: on first launch, right-click the app and choose Open.
 
 ## Features
 
+- **Welcome window** at launch (⇧⌘1 later): name a new route and pick its mode, or reopen a recent trace (name, date, distance, D+) with a double-click.
 - **Draw by anchor points**: left-click adds a point, the route between two points is computed automatically (BRouter) according to the active mode: Hiking, Road bike, Gravel, MTB, Shortest, Car, Straight line.
 - **Right-click on the map**: "Route to here (current mode)", "shortest", "straight line", "in… (other mode)", insert a point on the route, add a point of interest, close the loop, delete the last point, center the map, copy coordinates.
 - **Editing**: dragging an anchor recomputes both adjacent legs; clicking on the line inserts an anchor; ⌥-click forces a straight line; ⌫ deletes the selected point (⌘⌥⌫ the last one); ⌘Z / ⇧⌘Z named undo and redo.
